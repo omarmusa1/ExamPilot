@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - ExamPilot{% endblock %}
+{% block content %}
+<div class="row spread">
+  <div>
+    <h1>Welcome back, {{ current_user['name'] }}</h1>
+    <p class="subtitle">Manage your exams and view student performance.</p>
+  </div>
+  <a class="btn" href="{{ url_for('new_exam') }}">+ Create new exam</a>
+</div>
+
+{% if not exams %}
+  <div class="card"><p class="muted">No exams yet. Create your first one from a lesson text or PDF.</p></div>
+{% endif %}
+
+<div class="grid">
+{% for e in exams %}
+  <div class="card">
+    <div class="row spread">
+      <b>{{ e['title'] }}</b>
+      {% if e['published'] %}<span class="badge ok">Published</span>{% else %}<span class="badge warn">Draft</span>{% endif %}
+    </div>
+    <p class="muted small">{{ e['n_questions'] }} questions · {{ e['n_submissions'] }} submissions
+      {% if e['avg_pct'] is not none %}· avg {{ '%.0f'|format(e['avg_pct']) }}%{% endif %}</p>
+    <p class="small muted">Code: <span class="code-box" style="font-size:16px">{{ e['code'] }}</span></p>
+    <div class="row">
+      <a class="btn small secondary" href="{{ url_for('edit_exam', exam_id=e['id']) }}">Edit</a>
+      <a class="btn small secondary" href="{{ url_for('analytics', exam_id=e['id']) }}">Analytics</a>
+      <form class="inline" method="post" action="{{ url_for('delete_exam', exam_id=e['id']) }}"
+            onsubmit="return confirm('Delete this exam and all its submissions?')">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button class="btn small danger" type="submit">Delete</button>
+      </form>
+    </div>
+  </div>
+{% endfor %}
+</div>
+{% endblock %}

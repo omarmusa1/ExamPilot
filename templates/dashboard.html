@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}My quizzes - ExamPilot{% endblock %}
+{% block content %}
+<div class="row spread">
+  <div>
+    <h1>Hi {{ current_user['name'] }} 👋</h1>
+    <p class="subtitle">Your courses, your exams, your progress.</p>
+  </div>
+  <a class="btn" href="{{ url_for('new_quiz') }}">+ New quiz from my course</a>
+</div>
+
+<div class="stats">
+  <div class="stat"><span class="muted small">Quizzes</span><b>{{ stats.quizzes }}</b></div>
+  <div class="stat"><span class="muted small">Attempts</span><b>{{ stats.attempts }}</b></div>
+  <div class="stat"><span class="muted small">Average score</span><b>{{ '%.0f'|format(stats.average) }}%</b></div>
+</div>
+
+{% if not quizzes %}
+  <div class="card empty">
+    <div class="icon">📚</div>
+    <h2 style="margin-top:0">No quizzes yet</h2>
+    <p class="muted">Upload a lesson or a PDF and the AI will build an exam for you.</p>
+    <a class="btn" href="{{ url_for('new_quiz') }}">Create my first quiz</a>
+  </div>
+{% endif %}
+
+<div class="grid">
+{% for z in quizzes %}
+  <div class="card quiz-card">
+    <b>{{ z['title'] }}</b>
+    <p class="muted small" style="margin:0 0 8px">{{ z['n_questions'] }} questions · {{ z['n_attempts'] }} attempts</p>
+    {% if z['n_attempts'] %}
+      <p class="small" style="margin:0 0 8px">Last: <b>{{ '%.0f'|format(z['last_pct']) }}%</b> · Best: <b>{{ '%.0f'|format(z['best_pct']) }}%</b></p>
+      <div class="bar"><i style="width:{{ '%.0f'|format(z['best_pct']) }}%"></i></div>
+    {% else %}
+      <p class="small muted" style="margin:0">Not attempted yet.</p>
+    {% endif %}
+    <div class="row">
+      <a class="btn small" href="{{ url_for('take_quiz', quiz_id=z['id']) }}">Start</a>
+      <a class="btn small secondary" href="{{ url_for('quiz_detail', quiz_id=z['id']) }}">Details</a>
+    </div>
+  </div>
+{% endfor %}
+</div>
+{% endblock %}

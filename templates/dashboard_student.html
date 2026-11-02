@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - ExamPilot{% endblock %}
+{% block content %}
+<h1>Hi {{ current_user['name'] }}</h1>
+<p class="subtitle">Enter the code your teacher gave you to start an exam.</p>
+
+<div class="card">
+  <form method="post" action="{{ url_for('join') }}" class="row">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input name="code" placeholder="Exam code, e.g. K7M2QX" maxlength="6" required style="max-width:260px;text-transform:uppercase">
+    <button class="btn" type="submit">Start exam</button>
+  </form>
+</div>
+
+<h2>My results</h2>
+{% if not results %}
+  <div class="card"><p class="muted">You have not taken any exam yet.</p></div>
+{% else %}
+<div class="card">
+  <table>
+    <tr><th>Exam</th><th>Score</th><th>Date</th><th></th></tr>
+    {% for r in results %}
+    <tr>
+      <td>{{ r['title'] }}</td>
+      <td>{{ r['score'] }} / {{ r['total'] }} ({{ (100 * r['score'] / r['total'])|round|int if r['total'] else 0 }}%)</td>
+      <td class="muted">{{ r['submitted_at'] }}</td>
+      <td><a href="{{ url_for('result', submission_id=r['id']) }}">Review</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endif %}
+{% endblock %}

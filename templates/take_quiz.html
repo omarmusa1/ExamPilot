@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}{{ quiz['title'] }} - ExamPilot{% endblock %}
+{% block content %}
+<h1>{{ quiz['title'] }}</h1>
+<p class="subtitle">
+  {% if retry_missed %}Retry mode: only the {{ questions|length }} question{{ 's' if questions|length != 1 }} you missed last time.
+  {% else %}{{ questions|length }} questions. Unanswered questions count as wrong.{% endif %}
+  {% if has_use_case %}<br>Use-case answers are written in your own words and graded {{ 'by AI' if ai_engine != 'demo' else 'by keyword matching (demo mode)' }}.{% endif %}
+</p>
+
+<form method="post" action="{{ url_for('take_quiz', quiz_id=quiz['id']) }}"
+      onsubmit="var b=this.querySelector('button[type=submit]');b.disabled=true;b.textContent='Submitting...';">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  {% for q in questions %}
+  <div class="card">
+    <input type="hidden" name="qid" value="{{ q['id'] }}">
+    <p><span class="qnum">Q{{ loop.index }}.</span> <span class="badge">{{ type_labels.get(q['qtype'], q['qtype']) }}</span></p>
+
+    {% if q['qtype'] == 'use_case' %}
+      <div class="scenario"><b>Scenario</b><br>{{ q['scenario'] }}</div>
+      <p>{{ q['text'] }}</p>
+      <textarea name="t{{ q['id'] }}" style="min-height:130px" maxlength="4000" placeholder="Write your answer here..."></textarea>
+
+    {% elif q['qtype'] == 'true_false' %}
+      <p>{{ q['text'] }}</p>
+      <div class="tf-row">
+        <label class="option"><input type="radio" name="q{{ q['id'] }}" value="A"><span><b>True</b></span></label>
+        <label class="option"><input type="radio" name="q{{ q['id'] }}" value="B"><span><b>False</b></span></label>
+      </div>
+
+    {% else %}
+      <p>{{ q['text'] }}</p>
+      {% for letter, key in [('A','option_a'),('B','option_b'),('C','option_c'),('D','option_d')] %}
+        <label class="option">
+          <input type="radio" name="q{{ q['id'] }}" value="{{ letter }}">
+          <span><b>{{ letter }}.</b> {{ q[key] }}</span>
+        </label>
+      {% endfor %}
+    {% endif %}
+  </div>
+  {% endfor %}
+  <button class="btn" type="submit">Submit and see my score</button>
+</form>
+{% endblock %}

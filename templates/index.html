@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <span class="badge ok">Powered by Groq AI</span>
+  <h1>Turn your course into an <span class="grad">exam</span> in seconds</h1>
+  <p>Upload your lesson notes or a PDF. ExamPilot writes multiple-choice, true/false and use-case questions, grades you instantly, explains your mistakes and lets you retry only what you missed.</p>
+  <div class="row" style="justify-content:center">
+    <a class="btn large" href="{{ url_for('register') }}">Start studying free</a>
+    <a class="btn secondary large" href="{{ url_for('login') }}">I already have an account</a>
+  </div>
+</section>
+
+<div class="grid features">
+  <div class="card feature">
+    <div class="icon">📄</div>
+    <h2>1. Upload</h2>
+    <p class="muted">Upload a .txt, .md or .pdf of your course, or paste the text. Choose the question type, the number and the difficulty.</p>
+  </div>
+  <div class="card feature">
+    <div class="icon">✍️</div>
+    <h2>2. Take the exam</h2>
+    <p class="muted">Answer the AI-generated questions, then submit. You are graded instantly with an explanation for every question.</p>
+  </div>
+  <div class="card feature">
+    <div class="icon">📈</div>
+    <h2>3. Improve</h2>
+    <p class="muted">Retry only the questions you got wrong, retake the full exam and watch your score go up over time.</p>
+  </div>
+</div>
+{% endblock %}

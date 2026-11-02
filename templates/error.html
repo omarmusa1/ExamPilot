@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card empty">
+  <h1 class="grad" style="font-size:64px;margin-bottom:4px">{{ code }}</h1>
+  <p class="muted">{{ message }}</p>
+  <a class="btn" href="{{ url_for('index') }}">Go home</a>
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Edit questions - ExamPilot{% endblock %}
+{% block content %}
+<div class="row spread">
+  <div>
+    <h1>{{ quiz['title'] }}</h1>
+    <p class="subtitle">AI can make mistakes. Fix or delete any question before you study with it.</p>
+  </div>
+  <div class="row">
+    <a class="btn secondary" href="{{ url_for('quiz_detail', quiz_id=quiz['id']) }}">Back</a>
+    <a class="btn" href="{{ url_for('take_quiz', quiz_id=quiz['id']) }}">Start exam</a>
+  </div>
+</div>
+
+{% for q in questions %}
+<form class="card" method="post" action="{{ url_for('update_question', quiz_id=quiz['id'], qid=q['id']) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <label><span class="qnum">Q{{ loop.index }}</span> <span class="badge">{{ type_labels.get(q['qtype'], q['qtype']) }}</span></label>
+
+  {% if q['qtype'] == 'use_case' %}
+    <label>Scenario</label>
+    <textarea name="scenario" style="min-height:90px">{{ q['scenario'] }}</textarea>
+    <label>Question</label>
+    <textarea name="text" style="min-height:70px">{{ q['text'] }}</textarea>
+    <label>Reference answer (used for grading)</label>
+    <textarea name="model_answer" style="min-height:100px">{{ q['model_answer'] }}</textarea>
+
+  {% elif q['qtype'] == 'true_false' %}
+    <label>Statement</label>
+    <textarea name="text" style="min-height:70px">{{ q['text'] }}</textarea>
+    <label>Correct answer</label>
+    <select name="correct">
+      <option value="A" {% if q['correct'] == 'A' %}selected{% endif %}>True</option>
+      <option value="B" {% if q['correct'] == 'B' %}selected{% endif %}>False</option>
+    </select>
+
+  {% else %}
+    <label>Question</label>
+    <textarea name="text" style="min-height:70px">{{ q['text'] }}</textarea>
+    {% for letter, key in [('A','option_a'),('B','option_b'),('C','option_c'),('D','option_d')] %}
+      <label>Option {{ letter }}</label>
+      <input name="{{ letter|lower }}" value="{{ q[key] }}">
+    {% endfor %}
+    <label>Correct answer</label>
+    <select name="correct">
+      {% for letter in ['A','B','C','D'] %}
+        <option value="{{ letter }}" {% if q['correct'] == letter %}selected{% endif %}>{{ letter }}</option>
+      {% endfor %}
+    </select>
+  {% endif %}
+
+  <label>Explanation</label>
+  <input name="explanation" value="{{ q['explanation'] }}">
+  <p class="row">
+    <button class="btn small" type="submit" name="action" value="save">Save</button>
+    <button class="btn small danger" type="submit" name="action" value="delete"
+            onclick="return confirm('Delete this question?')">Delete</button>
+  </p>
+</form>
+{% endfor %}
+{% endblock %}

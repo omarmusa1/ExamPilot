@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}AI Settings - ExamPilot{% endblock %}
+
+{% block content %}
+<div class="settings-wrap">
+  <h1>AI Settings</h1>
+  <p class="subtitle">ExamPilot uses <b>Groq</b> (fast and free) to write and grade your exams.</p>
+
+  <form method="post" id="settingsForm" class="card">
+    <input type="hidden" name="csrf_token" id="csrf_token" value="{{ csrf_token }}">
+
+    <div class="provider active provider-single">
+      <b>Groq</b>
+      <span>Llama 3.3 70B - fast &amp; free</span>
+    </div>
+
+    <label class="field-title" for="api_key">Groq API key</label>
+    <div class="key-row">
+      <input type="password" id="api_key" name="api_key" value="{{ entered_key }}"
+             placeholder="gsk_..." autocomplete="off" spellcheck="false">
+      <button type="button" class="btn secondary" id="toggleKey">Show</button>
+    </div>
+    <p class="small muted">
+      Get a free key at
+      <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a>.
+      Leave it empty to use the offline demo mode.
+    </p>
+
+    <div id="testResult" class="test-result" style="display:none"></div>
+
+    <div class="row settings-actions">
+      <button type="submit" name="action" value="save" class="btn">Save</button>
+      <button type="button" id="testBtn" class="btn secondary" onclick="testApiKey()">Test key</button>
+      <a href="{{ url_for('dashboard') }}" class="btn secondary">Cancel</a>
+    </div>
+  </form>
+
+  <p class="small muted">Your key is used only to call Groq on your behalf.</p>
+</div>
+
+<script>
+const keyInput = document.getElementById("api_key");
+const testBtn = document.getElementById("testBtn");
+
+document.getElementById("toggleKey").addEventListener("click", function () {
+    const show = keyInput.type === "password";
+    keyInput.type = show ? "text" : "password";
+    this.textContent = show ? "Hide" : "Show";
+});
+
+async function testApiKey() {
+    const box = document.getElementById("testResult");
+    testBtn.disabled = true;
+    testBtn.textContent = "Testing...";
+    box.className = "test-result";
+    box.style.display = "block";
+    box.textContent = "Checking connection with Groq...";
+
+    const formData = new FormData();
+    formData.append("api_key", keyInput.value);
+    formData.append("csrf_token", document.getElementById("csrf_token").value);
+
+    try {
+        const resp = await fetch("{{ url_for('api_test_key') }}", { method: "POST", body: formData });
+        const data = await resp.json();
+        box.className = "test-result " + (data.ok ? "ok" : "bad");
+        box.textContent = data.message;
+    } catch (err) {
+        box.className = "test-result bad";
+        box.textContent = "Request failed: " + err;
+    } finally {
+        testBtn.disabled = false;
+        testBtn.textContent = "Test key";
+    }
+}
+</script>
+{% endblock %}

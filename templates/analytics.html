@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Analytics - ExamPilot{% endblock %}
+{% block content %}
+<div class="row spread">
+  <div>
+    <h1>{{ exam['title'] }}</h1>
+    <p class="subtitle">Class performance</p>
+  </div>
+  <a class="btn secondary" href="{{ url_for('dashboard') }}">Back</a>
+</div>
+
+<div class="stats">
+  <div class="stat"><span class="muted small">Submissions</span><b>{{ stats.count }}</b></div>
+  <div class="stat"><span class="muted small">Average</span><b>{{ '%.0f'|format(stats.average) }}%</b></div>
+  <div class="stat"><span class="muted small">Highest</span><b>{{ '%.0f'|format(stats.highest) }}%</b></div>
+  <div class="stat"><span class="muted small">Lowest</span><b>{{ '%.0f'|format(stats.lowest) }}%</b></div>
+</div>
+
+<h2>Per-question success rate</h2>
+<div class="card">
+  <table>
+    <tr><th>#</th><th>Question</th><th>Correct</th><th></th></tr>
+    {% for q in per_question %}
+    {% set pct = (100 * q['correct_count'] / q['attempts'])|round|int if q['attempts'] else 0 %}
+    <tr>
+      <td>{{ q['position'] }}</td>
+      <td>{{ q['text'][:90] }}{% if q['text']|length > 90 %}...{% endif %}</td>
+      <td>{{ q['correct_count'] }}/{{ q['attempts'] }}</td>
+      <td><div class="bar"><i style="width:{{ pct }}%"></i></div></td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+
+<h2>Students</h2>
+<div class="card">
+  {% if not submissions %}
+    <p class="muted">No submissions yet. Share the code <span class="code-box" style="font-size:16px">{{ exam['code'] }}</span> with your students.</p>
+  {% else %}
+  <table>
+    <tr><th>Student</th><th>Email</th><th>Score</th><th>Submitted</th></tr>
+    {% for s in submissions %}
+    <tr>
+      <td>{{ s['name'] }}</td><td class="muted">{{ s['email'] }}</td>
+      <td>{{ s['score'] }} / {{ s['total'] }}</td><td class="muted">{{ s['submitted_at'] }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

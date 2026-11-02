@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Sign up - ExamPilot{% endblock %}
+{% block content %}
+<div class="card auth-card">
+  <h1>Create your account</h1>
+  <p class="subtitle">Start turning your courses into exams.</p>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label for="name">Full name</label>
+    <input id="name" name="name" placeholder="Your name" autocomplete="name" required autofocus>
+    <label for="email">Email</label>
+    <input id="email" type="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+    <label for="password">Password (6+ characters)</label>
+    <input id="password" type="password" name="password" minlength="6" placeholder="Choose a password" autocomplete="new-password" required>
+    <p><button class="btn" type="submit">Sign up</button></p>
+  </form>
+  <p class="muted small auth-foot">Already registered? <a href="{{ url_for('login') }}">Log in</a></p>
+</div>
+{% endblock %}

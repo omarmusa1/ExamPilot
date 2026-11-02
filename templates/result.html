@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Results - ExamPilot{% endblock %}
+{% block content %}
+<h1>{{ quiz['title'] }}</h1>
+<div class="card" style="text-align:center">
+  <div class="score-ring">{{ attempt['score'] }} / {{ attempt['total'] }}</div>
+  <p class="muted">{{ pct }}% correct · {{ 'Full exam' if attempt['mode'] == 'full' else 'Missed questions only' }}</p>
+  <div class="bar" style="max-width:300px;margin:0 auto"><i style="width:{{ pct }}%"></i></div>
+  {% if delta is not none %}
+    <p class="small" style="margin-top:12px">
+      {% if delta > 0 %}<span style="color:var(--ok)">+{{ delta }} points</span> vs your previous full attempt
+      {% elif delta < 0 %}<span style="color:var(--bad)">{{ delta }} points</span> vs your previous full attempt
+      {% else %}Same as your previous full attempt{% endif %}
+    </p>
+  {% endif %}
+  <p class="row" style="justify-content:center;margin-top:16px">
+    {% if n_wrong %}
+      <a class="btn" href="{{ url_for('take_quiz', quiz_id=quiz['id'], mode='missed') }}">Retry {{ n_wrong }} missed question{{ 's' if n_wrong != 1 }}</a>
+    {% endif %}
+    <a class="btn secondary" href="{{ url_for('take_quiz', quiz_id=quiz['id']) }}">Retake full exam</a>
+    <a class="btn secondary" href="{{ url_for('quiz_detail', quiz_id=quiz['id']) }}">Quiz page</a>
+  </p>
+</div>
+
+<h2>Review</h2>
+{% for r in rows %}
+<div class="card">
+  <p><span class="qnum">Q{{ loop.index }}.</span> <span class="badge">{{ type_labels.get(r['qtype'], r['qtype']) }}</span>
+     {% if r['qtype'] == 'use_case' %}
+       <span class="badge {{ 'ok' if r['is_correct'] else 'warn' }}">{{ r['points']|pts }} / 1 points</span>
+     {% endif %}</p>
+
+  {% if r['qtype'] == 'use_case' %}
+    <div class="scenario"><b>Scenario</b><br>{{ r['scenario'] }}</div>
+    <p>{{ r['text'] }}</p>
+    <div class="option {{ 'correct' if r['is_correct'] else 'wrong' }}"><span><b>Your answer</b><br>{{ r['answer_text'] or 'No answer given.' }}</span></div>
+    {% if r['feedback'] %}<div class="explain"><b>Feedback:</b> {{ r['feedback'] }}</div>{% endif %}
+    <div class="option correct"><span><b>Reference answer</b><br>{{ r['model_answer'] }}</span></div>
+
+  {% else %}
+    <p>{{ r['text'] }}</p>
+    {% set letters = [('A','option_a'),('B','option_b')] if r['qtype'] == 'true_false' else [('A','option_a'),('B','option_b'),('C','option_c'),('D','option_d')] %}
+    {% for letter, key in letters %}
+      {% set cls = 'correct' if letter == r['correct'] else ('wrong' if letter == r['chosen'] else '') %}
+      <div class="option {{ cls }}">
+        <span><b>{{ letter + '.' if r['qtype'] != 'true_false' }}</b> {{ r[key] }}
+          {% if letter == r['chosen'] %}<span class="muted small"> (your answer)</span>{% endif %}
+          {% if letter == r['correct'] %}<span class="small"> ✓ correct</span>{% endif %}
+        </span>
+      </div>
+    {% endfor %}
+    {% if not r['chosen'] %}<p class="muted small">You did not answer this question.</p>{% endif %}
+  {% endif %}
+  {% if r['explanation'] %}<div class="explain">{{ r['explanation'] }}</div>{% endif %}
+</div>
+{% endfor %}
+<a class="btn secondary" href="{{ url_for('dashboard') }}">Back to my quizzes</a>
+{% endblock %}

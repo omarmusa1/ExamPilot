@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}New exam - ExamPilot{% endblock %}
+{% block content %}
+<h1>AI Exam Generator</h1>
+<p class="subtitle">Paste your lesson or upload a file. The AI will create multiple-choice questions you can review before publishing.</p>
+
+<form method="post" enctype="multipart/form-data" class="card" onsubmit="this.querySelector('button').disabled=true;this.querySelector('button').textContent='Generating...';">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <label for="title">Exam title</label>
+  <input id="title" name="title" placeholder="e.g. Chapter 3: Photosynthesis" required>
+
+  <label for="text">Lesson text</label>
+  <textarea id="text" name="text" placeholder="Paste the lesson content here..."></textarea>
+
+  <label for="file">...or upload a file (.txt, .md, .pdf)</label>
+  <input id="file" type="file" name="file" accept=".txt,.md,.pdf">
+
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
+    <div>
+      <label for="num_questions">Number of questions</label>
+      <input id="num_questions" type="number" name="num_questions" min="1" max="20" value="5">
+    </div>
+    <div>
+      <label for="difficulty">Difficulty</label>
+      <select id="difficulty" name="difficulty">
+        <option value="easy">Easy</option>
+        <option value="medium" selected>Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+    </div>
+    <div>
+      <label for="language">Question language</label>
+      <input id="language" name="language" placeholder="Same as the text">
+    </div>
+  </div>
+  <p><button class="btn" type="submit">Generate exam</button></p>
+  {% if ai_engine != 'claude' %}
+  <p class="muted small">Demo mode: no API key found, so questions are generated with a simple rule-based engine (fill-in-the-blank). Add <code>ANTHROPIC_API_KEY</code> to <code>.env</code> for real AI questions.</p>
+  {% endif %}
+</form>
+{% endblock %}

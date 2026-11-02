@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{{ exam['title'] }} - ExamPilot{% endblock %}
+{% block content %}
+<h1>{{ exam['title'] }}</h1>
+<p class="subtitle">{{ questions|length }} questions. You can submit only once.</p>
+
+<form method="post" onsubmit="return confirm('Submit your answers? You cannot retake this exam.')">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  {% for q in questions %}
+  <div class="card">
+    <p><span class="qnum">Q{{ loop.index }}.</span> {{ q['text'] }}</p>
+    {% for letter, key in [('A','option_a'),('B','option_b'),('C','option_c'),('D','option_d')] %}
+      <label class="option">
+        <input type="radio" name="q{{ q['id'] }}" value="{{ letter }}">
+        <span><b>{{ letter }}.</b> {{ q[key] }}</span>
+      </label>
+    {% endfor %}
+  </div>
+  {% endfor %}
+  <button class="btn" type="submit">Submit answers</button>
+</form>
+{% endblock %}
